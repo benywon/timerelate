@@ -168,8 +168,10 @@ public class GetItemTime {
             }
         }
         if(!this.HasDynasty) {
-            String home = getTime.getitemfrombaidu(term);
-            datelist = getTime.gettimeinterval(home);
+            String content = getTime.getitemfrombaidu(term);
+            //每次我们只取这个文章前一半的数据
+            String realcontent=content.substring(0,content.length()/2);
+            datelist = getTime.gettimeinterval(realcontent);
         }
         return datelist;
     }

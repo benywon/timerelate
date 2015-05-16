@@ -53,7 +53,7 @@ public class GetTime {
         List<Integer> timelist = new ArrayList<>();
         Set<String> set =FindWordFromSentence.ForwardMaxMatch(str);//正向最大匹配
         //扔到百度数据里面 抽取时间数据
-        //然后我们需要在这个问题里面找到明显的时间信息 比如1928年等等
+        //然后我们需要在这个里面找到明显的时间信息 比如1928年等等
         List<Integer> QuestionExplicitTime=GetItemTime.gettimeinterval(str);
         timelist.addAll(QuestionExplicitTime);
         boolean predy = false;

@@ -163,14 +163,20 @@ public class DealTime {
             float premiddis=SortedList.get(mid)-BaseMethods.IntegerListMid(pre);
             float sufmiddis=BaseMethods.IntegerListMid(suf)-SortedList.get(mid);
             //前后的比例是看方差来算的 如果差距大 就小 如果小 就大量 总共1/5
-            float precont=sufmiddis/(premiddis+sufmiddis);
-            float sufcont=1-precont;
-            decentnum= (int) (totalnum/5*precont);
-            acentnum=(int) (totalnum/5*sufcont);
-           for(i=((mid-decentnum)>=0?(mid-decentnum):0);i<=(mid+acentnum)&&i<totalnum;i++)
-           {
-               outlist.add(SortedList.get(i));
-           }
+//            意思就是I我们的时间区间如果很大 那么就让他占得比例小一点 如果时间区间很小 就让他占得比例大一点
+            if(premiddis==0.0&&sufmiddis==0.0)
+            {
+                outlist.add(SortedList.get(mid));
+            }
+            else {
+                float precont = sufmiddis / (premiddis + sufmiddis);
+                float sufcont = 1 - precont;
+                decentnum = (int) (totalnum / 5 * precont);
+                acentnum = (int) (totalnum / 5 * sufcont);
+                for (i = ((mid - decentnum) >= 0 ? (mid - decentnum) : 0); i <= (mid + acentnum) && i < totalnum; i++) {
+                    outlist.add(SortedList.get(i));
+                }
+            }
         }
         else//不只有一个最大值  所以我们要取中间的了 这个可以取大一点
         {
