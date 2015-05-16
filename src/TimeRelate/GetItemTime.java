@@ -14,7 +14,7 @@ public class GetItemTime {
     Date StartTime=new Date();
     Date EndTime=new Date();
 //    List<String> regexlist=new ArrayList<>();
-    public static  final String dateregex="公元前(\\d{1,4})年|(\\d{1,4})年[^前以之代]|年[\\(（](\\d{1,4})[\\)）]|(\\d{1,4})年$";
+    public static  final String dateregex="公元前(\\d{1,4})年|(\\d{1,4})年[^前以之代]|年[\\(（](\\d{1,4})[\\)）]|(\\d{1,4})年$|(\\d{1,2})世纪";
     String[] regexlist={"(\\d+)","公元前","公元","距今","世纪"};
     String[] ChineseNum={"零","一","二","三","四","五","六","七","八","九","十"};
     public boolean HasDynasty=false;
@@ -60,6 +60,12 @@ public class GetItemTime {
                 String number=m.group(4);
                 int date=Integer.parseInt(number);
                 datelist.add(date);
+            }
+            else if(m.group(5)!=null)//有什么什么世纪
+            {
+                String number=m.group(5);
+                int date=Integer.parseInt(number);
+                datelist.add(date*100);
             }
             else//公元前
             {
