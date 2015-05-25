@@ -17,6 +17,7 @@ public class GetItemTime {
     public static  final String dateregex="公元前(\\d{1,4})年|(\\d{1,4})年[^前以之代]|年[\\(（](\\d{1,4})[\\)）]|(\\d{1,4})年$|(\\d{1,2})世纪";
     String[] regexlist={"(\\d+)","公元前","公元","距今","世纪"};
     String[] ChineseNum={"零","一","二","三","四","五","六","七","八","九","十"};
+    final static  String[] StartTag={"正式开始","起始于","爆发"};
     public boolean HasDynasty=false;
     public String WhichDynasty="炳宁国";
     /**
@@ -77,6 +78,32 @@ public class GetItemTime {
 
         }
         return datelist;
+    }
+    /**
+     * 我们从一个文章里面抽取时间 这个可以是规则的方法（正则表达式==） 也可以是我们的其他方法 比如事件抽取中时间的抽取
+     * @param str 输入的一篇文章
+     */
+    public static List<Integer> gettimeintervalSTART(String str)
+    {
+        List<Integer> datelist=new ArrayList<>();
+        /*
+        首先简单匹配 就是纯阿拉伯字符串  但是前面有一些“公元”“年”==
+         */
+        Pattern p = Pattern.compile(dateregex);
+
+        String[] split=str.split("。|？|\r|\n");
+        for(String sentence:split)
+        {
+         for(String starttag:StartTag)
+         {
+             if(sentence.contains(starttag))
+             {
+                 List<Integer> list= gettimeinterval(sentence);
+                 return list;
+             }
+         }
+        }
+       return null;
     }
     /**
      * 主要是抽取时代的标签
@@ -176,7 +203,21 @@ public class GetItemTime {
         }
         return datelist;
     }
+    /**+
+     * 从一个字符串中获取百科页面时间list的函数
+     * @param term
+     * @return
+     */
+    public List<Integer> GetTermTimeListSTARTT(String term)
+    {
 
+        GetItemTime getTime= new GetItemTime();
+        List<Integer> datelist=new ArrayList<>();
+        String content = getTime.getitemfrombaidu(term);
+
+        datelist = getTime.gettimeinterval(content);
+        return datelist;
+    }
     /**
      * 从一段文字里面获取时间信息并且有朝代的影响在里面
      * @param term
