@@ -171,6 +171,7 @@ public class GetItemTime {
             String content = getTime.getitemfrombaidu(term);
             //每次我们只取这个文章前一半的数据
             String realcontent=content.substring(0,content.length()/2);
+//            String realcontent=content;
             datelist = getTime.gettimeinterval(realcontent);
         }
         return datelist;

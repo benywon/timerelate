@@ -15,14 +15,13 @@ public class GetTime {
     public GetItemTime getItemTime = new GetItemTime();
     public Queryer query;
     public String Question;
-//    public List<Integer> QuestionTimeList = new ArrayList<>();
-    public List<List<Integer>> QuestionTimeList = new ArrayList<>();
+    public List<Integer> QuestionTimeList = new ArrayList<>();
     public Map<String, List<Integer>> AnswersTimeList = new HashMap<>();
     public int ansertype = 0;//默认的时间问题类型是0  就是发生在什么时候
     //                  1  表示发生的先后顺序
     //                  2  表示最早
     //                  3  表示最晚
-    //                  4   同一世纪  同一时期一类的 时序排列 只不过时间全部在问题里面
+    //                  4   同一世纪  同一时期一类的 时序排列
     //                  5   起止时间
     //                  6   同一世纪 同一时期 但是是和问题中的时间有关
 
@@ -54,13 +53,9 @@ public class GetTime {
         List<Integer> timelist = new ArrayList<>();
         Set<String> set =FindWordFromSentence.ForwardMaxMatch(str);//正向最大匹配
         //扔到百度数据里面 抽取时间数据
-        //然后我们需要在这个里面找到明显的时间信息 比如1928年等等
-        List<Integer> QuestionExplicitTime=GetItemTime.gettimeinterval(str);
-        timelist.addAll(QuestionExplicitTime);
         boolean predy = false;
         List<Integer> preoneitem = new ArrayList<>();
         for (String term : set) {
-
             List<Integer> oneitem = new ArrayList<>(getItemTime.GetTermTimeList(term));
             if (oneitem.isEmpty())//如果是空我们就应该直接继续
             {
@@ -90,58 +85,13 @@ public class GetTime {
     }
 
     /**
-     *
-     * @param str 输入的数据
-     * @return 最后的一个带有时间的列表
-     */
-    private List<List<Integer>> gettimeListfromstring(String str) {
-        List<List<Integer>> timelist = new ArrayList<>();
-        Set<String> set =FindWordFromSentence.ForwardMaxMatch(str);//正向最大匹配
-        //扔到百度数据里面 抽取时间数据
-        //然后我们需要在这个里面找到明显的时间信息 比如1928年等等
-        List<Integer> QuestionExplicitTime=GetItemTime.gettimeinterval(str);
-        timelist.add(QuestionExplicitTime);
-        boolean predy = false;
-        List<Integer> preoneitem = new ArrayList<>();
-        for (String term : set) {
-
-            List<Integer> oneitem = new ArrayList<>(getItemTime.GetTermTimeList(term));
-            if (oneitem.isEmpty())//如果是空我们就应该直接继续
-            {
-                continue;
-            }
-            boolean nowdy = getItemTime.HasDynasty;
-            if (predy && nowdy)//前面一个和现在这个词都是朝代 那么我们就取他们之间的60年来当作这个item的区间 元末明初一类的
-            {
-                //时间就是 这两个之间的东西 我们应该将它们归位一类
-                timelist.removeAll(preoneitem);//先把上一个的删了
-                int trans = oneitem.get(0);
-                oneitem.clear();
-                for (int i = -30; i <= 30; i++) {
-                    oneitem.add(trans + i);
-                }
-            }
-            DealTime dealTime = new DealTime();
-            oneitem = dealTime.StripTimeList(oneitem);
-            timelist.add(oneitem);
-            preoneitem = oneitem;
-            predy = nowdy;
-        }
-        if (timelist.isEmpty()) {
-            return null;
-        }
-
-
-        return timelist;
-    }
-    /**
      * 得到问题的时间区间
      *
      * @param question
      */
     public void putquestion(String question) {
         this.Question = question;
-        this.QuestionTimeList = gettimeListfromstring(question);
+        this.QuestionTimeList = gettimefromstring(question);
         AnalysisTimeQuestion();
     }
 
@@ -235,7 +185,7 @@ public class GetTime {
             }
             if(getItemTime.HasDynasty)//问题中有朝代的信息
             {
-              this.QuestionTimeList.add(oneitem);
+                this.QuestionTimeList=oneitem;
             }
         }
         /**
@@ -252,7 +202,7 @@ public class GetTime {
             }
             oneitem = dealTime.StripTimeList(oneitem);//就是我们得到的结果 按时间从前到后
             timelist.addAll(oneitem);
-            timelist.add(Integer.MAX_VALUE);//每一个实体之间用一个maxvalue分割
+            timelist.add(Integer.MAX_VALUE);//每一个实体之间用一个maxvalue聚合
         }
         if (timelist.isEmpty()) {
             return null;
@@ -316,20 +266,15 @@ public class GetTime {
             break;
             case (2)://表示最早发生在什么时候
             {
-                /**
-                 * 这个问题又分为两个子类小问题
-                 */
                 //我们应该从问题前1/3匹配答案
-                List<List<Integer>> questionin = new ArrayList<>();
-                for (int j = 0; j <= QuestionTimeList.size() ; j++) {
-//                    questionin.add(QuestionTimeList.get(j));
-                    List<Integer> questemp=QuestionTimeList.get(j).subList(0,QuestionTimeList.get(j).size()/3);
-                    questionin.add(questemp);
+                List<Integer> questionin = new ArrayList<>();
+                for (int j = 0; j <= QuestionTimeList.size() / 3; j++) {
+                    questionin.add(QuestionTimeList.get(j));
                 }
                 while (i.hasNext()) {
                     String answer = i.next().toString();
                     List<Integer> list = AnswersTimeList.get(answer);
-                    float score = DealTime.CalTimeRelationList(questionin, list);
+                    float score = DealTime.CalTimeRelation(questionin, list);
                     if (score < min) {
                         min = score;
                         finalanswer = answer;
@@ -340,16 +285,14 @@ public class GetTime {
             case (3)://表示最晚发生在什么时候
             {
                 //我们应该从问题后1/3匹配答案
-                List<List<Integer>> questionin = new ArrayList<>();
-                for (int j = 0; j <= QuestionTimeList.size() ; j++) {
-//                    questionin.add(QuestionTimeList.get(j));
-                    List<Integer> questemp=QuestionTimeList.get(j).subList(QuestionTimeList.get(j).size()*2/3,QuestionTimeList.get(j).size()-1);
-                    questionin.add(questemp);
+                List<Integer> questionin = new ArrayList<>();
+                for (int j = QuestionTimeList.size() * 2 / 3; j < QuestionTimeList.size(); j++) {
+                    questionin.add(QuestionTimeList.get(j));
                 }
                 while (i.hasNext()) {
                     String answer = i.next().toString();
                     List<Integer> list = AnswersTimeList.get(answer);
-                    float score = DealTime.CalTimeRelationList(questionin, list);
+                    float score = DealTime.CalTimeRelation(questionin, list);
                     if (score < min) {
                         min = score;
                         finalanswer = answer;
@@ -395,7 +338,7 @@ public class GetTime {
                 while (i.hasNext()) {
                     String answer = i.next().toString();
                     List<Integer> list = AnswersTimeList.get(answer);
-                    float score = DealTime.CalTimeRelationList(QuestionTimeList, list);
+                    float score = DealTime.CalTimeRelation(QuestionTimeList, list);
                     if (score < min) {
                         min = score;
                         finalanswer = answer;
@@ -407,7 +350,7 @@ public class GetTime {
                 while (i.hasNext()) {
                     String answer = i.next().toString();
                     List<Integer> list = AnswersTimeList.get(answer);
-                    float score = DealTime.CalTimeRelationList(QuestionTimeList, list);
+                    float score = DealTime.CalTimeRelation(QuestionTimeList, list);
                     if (score < min) {
                         min = score;
                         finalanswer = answer;
@@ -421,29 +364,31 @@ public class GetTime {
 
         return finalanswer;
     }
-public void PutThisQuestion(getquestionANDanwer getquestionandanwer)
-{
-    String quest=getquestionandanwer.question;
-    putquestion(quest);
-    List<String> answers=getquestionandanwer.answers;
-    for(int i=0;i<answers.size();i++)
+    public void PutThisQuestion(getquestionANDanwer getquestionandanwer)
     {
-        putanswer(answers.get(i));
+        String quest=getquestionandanwer.question;
+        putquestion(quest);
+        List<String> answers=getquestionandanwer.answers;
+        for(int i=0;i<answers.size();i++)
+        {
+            putanswer(answers.get(i));
+        }
+        System.out.println(quest);
+        for(String answer:answers)
+        {
+            System.out.print(answer + "----");
+        }
+        System.out.println(" ");
     }
-    System.out.println(quest);
-    for(String answer:answers)
-    {
-        System.out.print(answer + "----");
-    }
-    System.out.println(" ");
-}
     public static void main(String[] args) {
         GetTime getTime = new GetTime();
         getquestionANDanwer getquestionandanwer = new getquestionANDanwer();
-        getTime.PutThisQuestion(getquestionandanwer);
-        System.out.println("答案是：-----");
-        String answer = getTime.GetAnswerByTime();
-        System.out.println(answer);
-        System.out.println("shudi");
+        for(int i=0;i<getquestionandanwer.QA_Pair.size();i++) {
+            getTime.PutThisQuestion(getquestionandanwer.outputaquestion(i));
+            System.out.println("答案是：-----");
+            String answer = getTime.GetAnswerByTime();
+            System.out.println(answer);
+            System.out.println("shudi");
+        }
     }
 }
