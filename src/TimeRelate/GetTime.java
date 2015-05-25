@@ -361,8 +361,19 @@ public class GetTime {
 
         }
 
-
+        dosomeclear();
         return finalanswer;
+    }
+
+    /**
+     * 每次回答完一个问题 清空的操作
+     */
+    private void dosomeclear()
+    {
+        this.AnswersTimeList=null;
+        this.ansertype=0;
+        this.QuestionTimeList=null;
+        this.Question=null;
     }
     public void PutThisQuestion(getquestionANDanwer getquestionandanwer)
     {
