@@ -21,7 +21,7 @@ public class GetTime {
     //                  1  表示发生的先后顺序
     //                  2  表示最早
     //                  3  表示最晚
-    //                  4   同一世纪  同一时期一类的 时序排列
+    //                  4   同一世纪  同一时期一类的 时序排列 但是问题中没有显性的时间表示
     //                  5   起止时间
     //                  6   同一世纪 同一时期 但是是和问题中的时间有关
 
@@ -53,9 +53,13 @@ public class GetTime {
         List<Integer> timelist = new ArrayList<>();
         Set<String> set =FindWordFromSentence.ForwardMaxMatch(str);//正向最大匹配
         //扔到百度数据里面 抽取时间数据
+        //然后我们需要在这个里面找到明显的时间信息 比如1928年等等
+        List<Integer> QuestionExplicitTime=GetItemTime.gettimeinterval(str);
+        timelist.addAll(QuestionExplicitTime);
         boolean predy = false;
         List<Integer> preoneitem = new ArrayList<>();
         for (String term : set) {
+
             List<Integer> oneitem = new ArrayList<>(getItemTime.GetTermTimeList(term));
             if (oneitem.isEmpty())//如果是空我们就应该直接继续
             {
@@ -65,8 +69,19 @@ public class GetTime {
             if (predy && nowdy)//前面一个和现在这个词都是朝代 那么我们就取他们之间的60年来当作这个item的区间 元末明初一类的
             {
                 //时间就是 这两个之间的东西 我们应该将它们归位一类
+                int pres=preoneitem.get(0);
+                int nows=oneitem.get(0);
                 timelist.removeAll(preoneitem);//先把上一个的删了
-                int trans = oneitem.get(0);
+                int trans=0;
+                if(pres<nows)//是上一个比较小
+                {
+                    trans= oneitem.get(0);
+                }
+                else
+                {
+                    trans = preoneitem.get(0);
+                }
+
                 oneitem.clear();
                 for (int i = -30; i <= 30; i++) {
                     oneitem.add(trans + i);
@@ -85,14 +100,76 @@ public class GetTime {
     }
 
     /**
+     * 起止时间的判断
+     * @param str
+     * @return
+     */
+    public List<Integer> gettimefromstringtype5(String str) {
+        List<Integer> timelist = new ArrayList<>();
+        Set<String> set =FindWordFromSentence.ForwardMaxMatch(str);//正向最大匹配
+        //扔到百度数据里面 抽取时间数据
+        //然后我们需要在这个里面找到明显的时间信息 比如1928年等等
+        List<Integer> QuestionExplicitTime=GetItemTime.gettimeinterval(str);
+        timelist.addAll(QuestionExplicitTime);
+        boolean predy = false;
+        List<Integer> preoneitem = new ArrayList<>();
+        for (String term : set) {
+
+            List<Integer> oneitem = new ArrayList<>(getItemTime.GetTermTimeListSTARTT(term));
+            if (oneitem.isEmpty())//如果是空我们就应该直接继续
+            {
+                continue;
+            }
+            boolean nowdy = getItemTime.HasDynasty;
+            if (predy && nowdy)//前面一个和现在这个词都是朝代 那么我们就取他们之间的60年来当作这个item的区间 元末明初一类的
+            {
+                //时间就是 这两个之间的东西 我们应该将它们归位一类
+                int pres=preoneitem.get(0);
+                int nows=oneitem.get(0);
+                timelist.removeAll(preoneitem);//先把上一个的删了
+                int trans=0;
+                if(pres<nows)//是上一个比较小
+                {
+                    trans= oneitem.get(0);
+                }
+                else
+                {
+                    trans = preoneitem.get(0);
+                }
+
+                oneitem.clear();
+                for (int i = -30; i <= 30; i++) {
+                    oneitem.add(trans + i);
+                }
+            }
+            timelist.addAll(oneitem);
+            preoneitem = oneitem;
+            predy = nowdy;
+        }
+        if (timelist.isEmpty()) {
+            return null;
+        }
+        DealTime dealTime = new DealTime();
+        List<Integer> lists = dealTime.StripTimeList(timelist);//就是我们得到的结果 按时间从前到后
+        return lists;
+    }
+    /**
      * 得到问题的时间区间
      *
      * @param question
      */
     public void putquestion(String question) {
         this.Question = question;
-        this.QuestionTimeList = gettimefromstring(question);
         AnalysisTimeQuestion();
+        if(this.ansertype!=5)
+        {
+            this.QuestionTimeList = gettimefromstring(question);
+        }
+        else
+        {
+            this.QuestionTimeList=gettimefromstringtype5(question);
+        }
+
     }
 
     /**
@@ -142,8 +219,11 @@ public class GetTime {
         DealTime dealTime = new DealTime();
         for (String term : set) {
             List<Integer> oneitem = new ArrayList<>(getItemTime.GetTermTimeList(term));
-            oneitem = dealTime.StripTimeList(oneitem);//就是我们得到的结果 按时间从前到后
-            timelist.addAll(oneitem);
+            if(oneitem.size()!=0) {
+                oneitem = dealTime.StripTimeList(oneitem);//就是我们得到的结果 按时间从前到后
+                timelist.addAll(oneitem);
+
+            }
             timelist.add(Integer.MAX_VALUE);//每一个实体之间用一个maxvalue聚合
         }
         if (timelist.isEmpty()) {
@@ -222,7 +302,7 @@ public class GetTime {
             this.ansertype = 2;
         } else if (this.Question.contains("最晚")) {
             this.ansertype = 3;
-        } else if (this.Question.contains("同一时期") || this.Question.contains("同属于一个朝代") || this.Question.contains("同一时代")) {
+        } else if (this.Question.contains("同一") || this.Question.contains("同属") ) {
             if (this.QuestionTimeList==null) {//是答案中有两个时间的那种问题
                 this.ansertype = 4;
             } else {
@@ -338,10 +418,23 @@ public class GetTime {
                 while (i.hasNext()) {
                     String answer = i.next().toString();
                     List<Integer> list = AnswersTimeList.get(answer);
-                    float score = DealTime.CalTimeRelation(QuestionTimeList, list);
-                    if (score < min) {
-                        min = score;
-                        finalanswer = answer;
+                    int max=-1;
+
+                    for(Integer time:list)
+                    {
+                        int number=0;
+                        for(Integer qtime:QuestionTimeList)
+                        {
+                            if(qtime==time)
+                            {
+                                number++;
+                                if(number>=max)
+                                {
+                                    max=number;
+                                    finalanswer = answer;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -370,9 +463,12 @@ public class GetTime {
      */
     private void dosomeclear()
     {
-        this.AnswersTimeList=null;
+        this.AnswersTimeList.clear();
         this.ansertype=0;
-        this.QuestionTimeList=null;
+        if(this.QuestionTimeList!=null)
+        {
+            this.QuestionTimeList.clear();
+        }
         this.Question=null;
     }
     public void PutThisQuestion(getquestionANDanwer getquestionandanwer)
@@ -398,8 +494,8 @@ public class GetTime {
             getTime.PutThisQuestion(getquestionandanwer.outputaquestion(i));
             System.out.println("答案是：-----");
             String answer = getTime.GetAnswerByTime();
-            System.out.println(answer);
-            System.out.println("shudi");
+            System.out.println(answer.replaceAll("\r|\n",""));
+            System.out.println("\r\n");
         }
     }
 }
