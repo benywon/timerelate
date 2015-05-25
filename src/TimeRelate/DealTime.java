@@ -79,7 +79,7 @@ public class DealTime {
      * @param list
      * @return
      */
-    public List<Integer> SortIntegerList(List<Integer> list)
+    public static List<Integer> SortIntegerList(List<Integer> list)
     {
         Collections.sort(list);
         return list;
@@ -207,6 +207,26 @@ public class DealTime {
         }
         return Math.abs(time1-time2);
     }
+    public static float CalTimeRelationList(List<List<Integer>> timelist1,List<Integer> timelist2)
+    {
+        int len1=timelist1.size();
+        List<Integer> scores=new ArrayList<>();
+        for(int i=0;i<len1;i++)
+        {
+            List<Integer> times1=timelist1.get(i);
+            int time1= (int) BaseMethods.IntegerListMid(times1);
+            int time2= (int) BaseMethods.IntegerListMid(timelist2);
+            if(time1==Integer.MAX_VALUE&&time2==Integer.MAX_VALUE)
+            {
+                return Integer.MAX_VALUE;
+            }
+            scores.add(Math.abs(time1-time2));
+        }
+        //现在还有一种方法 就是算分别得时间 还有中位数
+//        我们采取的方法还是中位数
+        return (float)catmidnumber(scores);
+
+    }
     //第四种  我们就是计算类似方差一样的东西
     public static float CalTimeType4(List<Float> in)
     {
@@ -227,5 +247,17 @@ public class DealTime {
         }
         sum/=num;
         return sum;
+    }
+    public static int catmidnumber(List<Integer> list)
+    {
+        int size=list.size();
+        if(size==0)
+        {
+            return Integer.MAX_VALUE;
+        }
+        else {
+            List<Integer> SortedList = SortIntegerList(list);
+            return size%2==0?(SortedList.get(size/2-1)+SortedList.get(size/2))/2:SortedList.get((size-1)/2);
+        }
     }
 }
