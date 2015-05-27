@@ -12,5 +12,6 @@
     <orderEntry type="library" name="lucene-analyzers-common-4.10.2" level="project" />
     <orderEntry type="library" name="lukeall-4.10.2" level="project" />
     <orderEntry type="library" name="postgresql-9.4-1201.jdbc41" level="project" />
+    <orderEntry type="library" name="libsvm" level="project" />
   </component>
 </module>
