@@ -173,6 +173,28 @@ public class BaseMethods {
         }
         return map;
     }
+
+    /**
+     * 查找一个在另一个里面出现几次
+     * @param bigstr
+     * @param str
+     * @return
+     */
+    public static int getStrcount(String bigstr,String str)
+    {
+        int count=0;
+        String[] k=bigstr.split(str);
+        if(bigstr.lastIndexOf(str)==(str.length()-bigstr.length()))
+            count=k.length;
+        else
+            count=k.length-1;
+        if(count==0)
+            return 0;
+        else
+            return count;
+    }
+
+
 }
 //比较器类
 

@@ -11,7 +11,8 @@ import java.util.*;
  */
 public class GetTime {
     public List<TimeInterval> Dlist = new ArrayList<>();//朝代和时间
-    public static Set<String> ItemList = new HashSet<>();//百科的条目
+    public static List<String> ItemList = new ArrayList<>();//百科的条目
+    public static Set<String> ItemSet = new HashSet<>();//百科的条目
     public GetItemTime getItemTime = new GetItemTime();
     public Queryer query;
     public String Question;
@@ -45,7 +46,8 @@ public class GetTime {
         //首先获取我们的日期文件--朝代 时间
         Dlist = new DealDynasty().dynastylist;
         //然后获取百度百科条目字典文件
-        ItemList = ItemMap.readfrommap();
+        ItemList = ItemMap.readfrommap(3);
+        ItemSet = ItemMap.readfrommap();
         query = new Queryer();//百度相关的  检索器什么的 因为都是静态方法 所以只用在初始化的时候初始化一下就行
     }
 

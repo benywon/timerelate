@@ -7,7 +7,9 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,6 +19,7 @@ public class ItemMap {
     public final static String ItemFile="J:\\BAIDU\\BAIDU\\words-my.dic";
     public final static String ItemFileStripEng="L:\\program\\cip\\SAT-HISTORY\\3月\\时间地点相关\\words-myafter.txt";
     public final static String ItemMapFile="L:\\program\\cip\\SAT-HISTORY\\3月\\时间地点相关\\ItemList.set";
+    public final static String ItemListFile="L:\\program\\cip\\SAT-HISTORY\\3月\\时间地点相关\\ItemList.list";
     public static void File2List()
     {
         Set<String> list=new HashSet<>();
@@ -47,6 +50,13 @@ public class ItemMap {
     {
         Set<String> set=new HashSet<>();
         set= (Set<String>)MyFile.ReadObj(ItemMapFile);
+        return set;
+    }
+
+    public static List readfrommap(int number)
+    {
+        List<String> set=new ArrayList<>();
+        set= (List<String>)MyFile.ReadObj(ItemListFile);
         return set;
     }
 
