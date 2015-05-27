@@ -280,14 +280,13 @@ public class GetTime {
             {
                 continue;
             }
-            oneitem = dealTime.StripTimeList(oneitem);//就是我们得到的结果 按时间从前到后
+//            oneitem = dealTime.StripTimeList(oneitem);//就是我们得到的结果 按时间从前到后
             timelist.addAll(oneitem);
-            timelist.add(Integer.MAX_VALUE);//每一个实体之间用一个maxvalue聚合
         }
         if (timelist.isEmpty()) {
             return null;
         }
-        return timelist;
+        return dealTime.StripTimeList(timelist);
 
     }
 
@@ -425,7 +424,7 @@ public class GetTime {
                         int number=0;
                         for(Integer qtime:QuestionTimeList)
                         {
-                            if(qtime==time)
+                            if(qtime.equals(time))
                             {
                                 number++;
                                 if(number>=max)
@@ -436,6 +435,7 @@ public class GetTime {
                             }
                         }
                     }
+
                 }
             }
             break;

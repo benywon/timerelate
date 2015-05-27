@@ -1,7 +1,10 @@
 package BaiduRelate.oldbaidu;
+
 import java.sql.*;
-
-
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 /**我的数据库函数 一般都是为了查找一些东西
@@ -10,7 +13,7 @@ import java.sql.*;
 public  class MYDB  {
     public Connection con;
     public Statement statement;//是一个语句 每次更新都用这个语句来更新
-    public String TableName="BaiduTagLists";
+    public static String TableName="BaiduTagLists";
     public String IndexName="baikeKey";
     /**
      * 创建新表的函数 由于我们是为了存储百度taglist所以只有两个值  一个是key id  还有一个就是tag列表  text类型的
@@ -32,6 +35,10 @@ public  class MYDB  {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
+    }
+    protected void finalize()
+    {
+      this.close();
     }
 
     /**
@@ -142,6 +149,31 @@ public  class MYDB  {
         }
         return  result;
     }
+
+    /**
+     * 获取所有标签
+     * @return
+     */
+    public Set<String> Findevery()
+    {
+        Set<String> result=new HashSet<>();
+        String sql = " select TagList from "+TableName+";" ;
+        try {
+            ResultSet rs = this.statement.executeQuery(sql);
+            while(rs.next())
+            {
+                String[] tag=rs.getString("TagList").split(",|、| ");
+                List<String> list= Arrays.asList(tag);
+                result.addAll(list);
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+        return  result;
+    }
+
     public boolean getindex()
     {
         String sql="create index "+this.IndexName+" on "+this.TableName+"("+this.IndexName+");";
@@ -152,6 +184,12 @@ public  class MYDB  {
             return false;
         }
         return true;
+    }
+
+    public static void main(String[] args) {
+        MYDB mydb=new MYDB();
+        mydb.Findevery();
+
     }
 }
 

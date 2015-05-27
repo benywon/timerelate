@@ -33,7 +33,7 @@ public class Queryer {
     public Queryer()
     {
         DealDynasty timeInterval =new DealDynasty();
-        String[] tags={"历史","朝代","战争","著作","文学","革命","文物","文化","人物"};
+        String[] tags={"历史","朝代","战争","著作","文学","革命","文物","文化","人物","科技"};
 
         for (String tag:tags)
         {
