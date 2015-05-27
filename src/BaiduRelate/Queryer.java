@@ -28,7 +28,7 @@ public class Queryer {
     public static final String indexDicPath="J:\\BAIDU\\baidu-index";
     public static MYDB MyDb=new MYDB();
     private static List<String> HistoryTags=new ArrayList<>();//我们的历史标签还应该包括朝代名称
-    public static String[] noisetags={"电影","电视剧","歌曲","解释","影视","流行","词语","词汇","汉字"};//我们定义的虚假的噪声标签
+    public static String[] noisetags={"电影","电视剧","歌曲","解释","影视","流行","词语","词汇","汉字","字"};//我们定义的虚假的噪声标签
     static IndexReader ir = null;
     public Queryer()
     {
@@ -107,6 +107,27 @@ public class Queryer {
      }
     return str;
  }
+    public  String GetStringFromBaiduWithTagConstrain(String field,String inquery,String[] tag)
+    {
+        IndexSearcher searcher = new IndexSearcher(ir);
+        Term t =new Term(field,inquery);
+        String str="";
+        try {
+            TermQuery query=new TermQuery(t);
+            ScoreDoc[] docs=searcher.search(query,20).scoreDocs;
+            for (ScoreDoc hit : docs) {
+                //我们还要有一个判断是不是
+                Document doc = searcher.doc(hit.doc);
+                if(isvalidhistory(doc,tag)) {
+                    str += doc.getField("content").stringValue();
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return str;
+    }
 
     public static boolean isvalidhistory(Document doc)
     {
@@ -148,4 +169,33 @@ public class Queryer {
         return false;
     }
 
+    /***
+     * 指定了tag
+     * @param doc
+     * @return
+     */
+    public static boolean isvalidhistory(Document doc,String[] intags) {
+        String idstr = doc.getField("sublemmaid").stringValue();
+        int id = Integer.parseInt(idstr);
+        String result;
+        result = MyDb.FindKey(id);
+        if (result == null) {
+            return false;
+        }
+        if (result.equals("null")) {
+            return false;
+        }
+        Set<String> tags = new HashSet<String>(Arrays.asList(result.split(",")));
+        //先排除噪声的影响
+        for (String thistag : tags) {
+            for(String tag:intags)
+            {
+                if (thistag.contains(tag))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

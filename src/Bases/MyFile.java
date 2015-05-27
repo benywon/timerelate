@@ -56,6 +56,25 @@ public class MyFile {
     }
 
     /**
+     * 获取一个文件夹下面所有文件
+     * @param filelist
+     * @param filePath
+     */
+    public static void getFilesFromDirectory(List<String>filelist,String filePath){
+        File root = new File(filePath);
+        File[] files = root.listFiles();
+        for(File file:files){
+            if(file.isDirectory()){
+                getFilesFromDirectory(filelist,file.getAbsolutePath());
+
+            }else{
+                filelist.add(file.getAbsolutePath());
+            }
+        }
+    }
+
+
+    /**
      * 将一个对象写入文件
      * @param map
      * @param filepath
