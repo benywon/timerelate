@@ -1,10 +1,13 @@
 package TextClassification;
 
+import Bases.BaseMethods;
 import Bases.MyFile;
 import TimeRelate.FindWordFromSentence;
 import TimeRelate.GetTime;
+import de.bwaldvogel.liblinear.*;
 import libsvm.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,8 @@ public class ClassifyTexts {
     public final String POSFILE=BuildTrainTxt.HistoryFILE;
     public final String NEGFILE=BuildTrainTxt.HistoryFILENEG;
     public final String SVMMODELPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\classiftextsvmmodel.svmmodel";
+    public final String SVMMODELPATH2="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\classiftextsvmmodel-liblinear.svmmodel";
+    public int SVMTYPE=2;//默认是libsvm
     public final String TRAINPOSLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\postive.listmap";
     public final String TRAINNEGLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\negative.listmap";
     public final String TESTPOSLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\postive.listmap";
@@ -30,73 +35,142 @@ public class ClassifyTexts {
 
     }
     //我们的样本集构建完毕之后  就可以来进行建模了
-    public void BuildModel()
+    public void BuildModel(int type)//type是我们的类型 是liblinear还是libsvm
     {
+        String trainfile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\train.txt";
         this.poslist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINPOSLISTPATH);
         this.neglist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINNEGLISTPATH);
         System.out.println("读取训练集完毕");
-        //定义训练集点a{10.0, 10.0} 和 点b{-10.0, -10.0}，对应lable为{1.0, -1.0}
-        svm_node[][] traindata=new svm_node[poslist.size()+neglist.size()][];
-        double[] label=new double[poslist.size()+neglist.size()];
-        int i1=-1;
-        for(Map<Integer,Integer> map:poslist)
-        {
-            svm_node[] nodes = new svm_node[map.size()];
-            int i=-1;
-            for(Map.Entry<Integer,Integer> entry:map.entrySet())
-            {
-                svm_node node=new svm_node();
-                node.index=entry.getKey();
-                node.value=entry.getValue();
-                nodes[++i]=node;
+        if(type==1) {
+            SVMTYPE=1;
+            //定义训练集点a{10.0, 10.0} 和 点b{-10.0, -10.0}，对应lable为{1.0, -1.0}
+            svm_node[][] traindata = new svm_node[poslist.size() + neglist.size()][];
+            double[] label = new double[poslist.size() + neglist.size()];
+            int i1 = -1;
+            for (Map<Integer, Integer> map : poslist) {
+                svm_node[] nodes = new svm_node[map.size()];
+                int i = -1;
+                String str = "";
+                for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                    svm_node node = new svm_node();
+                    node.index = entry.getKey();
+                    node.value = entry.getValue();
+                    str += node.index + ":" + node.value + " ";
+                    nodes[++i] = node;
+                }
+                traindata[++i1] = nodes;
+                MyFile.Write2File(1 + " " + str + "\n", trainfile, true);
+                label[i1] = 1;
             }
-            traindata[++i1]=nodes;
-            label[i1]=1;
-        }
-        for(Map<Integer,Integer> map:neglist)
-        {
-            svm_node[] nodes = new svm_node[map.size()];
-            int i=-1;
-            for(Map.Entry<Integer,Integer> entry:map.entrySet())
-            {
-                svm_node node=new svm_node();
-                node.index=entry.getKey();
-                node.value=entry.getValue();
-                nodes[++i]=node;
+            for (Map<Integer, Integer> map : neglist) {
+                svm_node[] nodes = new svm_node[map.size()];
+                int i = -1;
+                String str = "";
+                for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                    svm_node node = new svm_node();
+                    node.index = entry.getKey();
+                    node.value = entry.getValue();
+                    nodes[++i] = node;
+                    str += node.index + ":" + node.value + " ";
+                }
+                traindata[++i1] = nodes;
+                MyFile.Write2File(-1 + " " + str + "\n", trainfile, true);
+                label[i1] = -1;
             }
-            traindata[++i1]=nodes;
-            label[i1]=-1;
+
+            //定义svm_problem对象
+            svm_problem problem = new svm_problem();
+            problem.l = poslist.size() + neglist.size(); //向量个数
+            problem.x = traindata; //训练集向量表
+            problem.y = label; //对应的lable数组
+
+            //定义svm_parameter对象
+            svm_parameter param = new svm_parameter();
+            param.svm_type = svm_parameter.C_SVC;
+            param.kernel_type = svm_parameter.LINEAR;
+            param.cache_size = 100;
+            param.C = 10;
+//        param.nu=5;
+            param.eps = 0.00001;
+
+//        svm.svm_cross_validation(problem,param,5,label);
+
+            //训练SVM分类模型
+            System.out.println(svm.svm_check_parameter(problem, param)); //如果参数没有问题，则svm.svm_check_parameter()函数返回null,否则返回error描述。
+            svm_model model = svm.svm_train(problem, param); //svm.svm_train()训练出SVM分类模型
+            try {
+                svm.svm_save_model(SVMMODELPATH, model); //该方法将svm_model保存到文件中
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        else if(type==2)
+        {
+            //是liblinear
+            SVMTYPE=2;
+            Feature[][] featureMatrix = new Feature[poslist.size()+neglist.size()][];
+            double[] label = new double[poslist.size()+neglist.size()];
+            int j=-1;
 
-        //定义svm_problem对象
-        svm_problem problem = new svm_problem();
-        problem.l = poslist.size()+neglist.size(); //向量个数
-        problem.x = traindata; //训练集向量表
-        problem.y = label; //对应的lable数组
+            for (Map<Integer, Integer> map : poslist) {
+                map=(Map)BaseMethods.sortMapByKey(map);
+                Feature[] nodes = new FeatureNode[map.size()];
+                int i = -1;
+                for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                    FeatureNode node =new FeatureNode(entry.getKey(),entry.getValue());
+                    nodes[++i]=node;
+                }
+                featureMatrix[++j]=nodes;
+                label[j]=1;
+            }
+            for (Map<Integer, Integer> map : neglist)
+            {
+                Feature[] nodes = new FeatureNode[map.size()];
+                int i = -1;
+                //我们要按升序对特征进行排列
+                map=(Map)BaseMethods.sortMapByKey(map);
+                for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                    FeatureNode node =new FeatureNode(entry.getKey(),entry.getValue());
+                    nodes[++i]=node;
+                }
+                featureMatrix[++j]=nodes;
+                label[j]=-1;
+            }
+            //开始建模了
+            Problem problem = new Problem();
+            problem.l =poslist.size()+neglist.size() ; // number of training examples：训练样本数
+            problem.n=FindWordFromSentence.DictionaryWordCount;
+            problem.x = featureMatrix; // feature nodes：特征数据
+            problem.y = label; // target values：类别
+            SolverType solver = SolverType.L2R_L2LOSS_SVC; // -s 0
+            double C = 1.0;    // cost of constraints violation
+            double eps = 0.01; // stopping criteria
 
-        //定义svm_parameter对象
-        svm_parameter param = new svm_parameter();
-        param.svm_type = svm_parameter.C_SVC;
-        param.kernel_type = svm_parameter.LINEAR;
-        param.cache_size = 100;
-        param.C = 5;
-        param.eps = 0.00001;
-
-        //训练SVM分类模型
-        System.out.println(svm.svm_check_parameter(problem, param)); //如果参数没有问题，则svm.svm_check_parameter()函数返回null,否则返回error描述。
-        svm_model model = svm.svm_train(problem, param); //svm.svm_train()训练出SVM分类模型
-        try {
-            svm.svm_save_model(SVMMODELPATH,model); //该方法将svm_model保存到文件中
-        } catch (IOException e) {
-            e.printStackTrace();
+            Parameter parameter = new Parameter(solver, C, eps);
+            Model model = Linear.train(problem, parameter);
+            File modelFile = new File(SVMMODELPATH2);
+            try {
+                model.save(modelFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
+    /**
+     * 测试我们的数据
+     * @param dir 测试文本的目录
+     * @param outpath 输出的结果
+     * @return
+     */
 public List<Double> testresult(String dir,String outpath)
 {
+
     List<Double> result=new ArrayList<>();
     MyFile.DeleteFile(outpath);
     List<Map<Integer,Integer>> testlistmap=BuildMyFeature(dir);
+    if(SVMTYPE==1)
+    {
     try {
         svm_model model=svm.svm_load_model(SVMMODELPATH); //该方法将svm_model保存到文件中
 
@@ -126,10 +200,50 @@ public List<Double> testresult(String dir,String outpath)
         }
     }
     System.out.println("正例为："+right);
+    }
+    else if(SVMTYPE==2)
+    {
+        File modelFile = new File(SVMMODELPATH2);
+        try {
+            Model model=Model.load(modelFile);
+            for (Map<Integer, Integer> map : testlistmap) {
+                map=(Map)BaseMethods.sortMapByKey(map);
+                Feature[] nodes = new FeatureNode[map.size()];
+                int i = -1;
+                for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                    FeatureNode node =new FeatureNode(entry.getKey(),entry.getValue());
+                    nodes[++i]=node;
+                }
+                double prediction = Linear.predict(model, nodes);
+                result.add(prediction);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int right=0;
+        for(double re:result)
+        {
+            MyFile.Write2File(re + "      ", outpath, true);
+            if(re>0)
+            {
+                right++;
+            }
+        }
+        System.out.println("正例为："+right);
+
+    }
     return result;
 }
 
     //我们先构建正样本的的例子
+
+    /**
+     * 构建我们的特征矩阵
+     * @param posdir
+     * @param negdir
+     * @param OutPosList
+     * @param OutNegList
+     */
     public void BuildMyFeature(String posdir,String negdir,String OutPosList,String OutNegList)
     {
         GetTime getTime=new GetTime();
@@ -197,11 +311,10 @@ public List<Double> testresult(String dir,String outpath)
         //预测测试数据的lable
 //        System.out.println(svm.svm_predict(model, pc));
     }
-
     public static void main(String[] args) {
         ClassifyTexts classifyTexts=new ClassifyTexts();
-        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
-        classifyTexts.BuildModel();
+//        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
+        classifyTexts.BuildModel(2);
         classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp","L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
 
     }

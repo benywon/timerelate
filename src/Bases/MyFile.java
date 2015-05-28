@@ -169,7 +169,7 @@ public class MyFile {
         try {
             fw = new FileWriter(filepath,isadd);
 
-            fw.write(str+"\n");
+            fw.write(str);
 
             fw.close();
         } catch (IOException e1) {

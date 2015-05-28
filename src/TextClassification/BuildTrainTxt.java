@@ -30,8 +30,8 @@ public class BuildTrainTxt {
     public final String TestHistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test-txt.txt";
     public final static String HistoryFILE="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-pos";
     public final static String HistoryFILENEG="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-neg";
-    public final static String TestHistoryPos="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\Test-history-pos";
-    public final static String TestHistoryNeg="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\Test-history-neg";
+    public final static String TestHistoryPos="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-pos";
+    public final static String TestHistoryNeg="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-neg";
 
     public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具"};//我们定义的虚假的噪声标签
     public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物"};
@@ -60,16 +60,16 @@ public class BuildTrainTxt {
             String cc2=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,noisetags,true);
             if(!cc2.equals(""))
             {
-                String  path=this.HistoryFILENEG+"\\"+tag+".txt";
+                String  path=this.TestHistoryNeg+"\\"+tag+".txt";
                 MyFile.Write2File(cc2,path,false);
                 continue;
             }
-//            String cc=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,postags,false);
-//            if(!cc.equals(""))
-//            {
-//                String  path=this.HistoryFILE+"\\"+tag+".txt";
-//                MyFile.Write2File(cc,path,false);
-//            }
+            String cc=queryer.GetStringFrom("lemmatitle", tag);
+            if(!cc.equals(""))
+            {
+                String  path=this.TestHistoryPos+"\\"+tag+".txt";
+                MyFile.Write2File(cc,path,false);
+            }
 
         }
         System.out.println("测试集生成成功");

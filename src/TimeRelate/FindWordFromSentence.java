@@ -8,6 +8,7 @@ import java.util.*;
 public class FindWordFromSentence {
     public static Set<String> ItemSet = GetTime.ItemSet;
     public static Map<String,Integer> ItemMap = GetTime.ItemMaps;
+    public static final int DictionaryWordCount=ItemSet.size();
 
     private static final int MAX_MATCH_LEGTH=30;
     /**

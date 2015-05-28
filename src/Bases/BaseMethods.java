@@ -78,7 +78,7 @@ public class BaseMethods {
      * @param oriMap
      * @return
      */
-    public static Map<Integer, Object> sortMapByKey(Map<Integer, Object> oriMap) {
+    public static Map<Integer, Object> sortMapByKey(Map oriMap) {
         if (oriMap == null || oriMap.isEmpty()) {
             return null;
         }

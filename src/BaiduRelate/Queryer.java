@@ -149,7 +149,7 @@ public class Queryer {
         {
             for(String noise:noisetags)
             {
-                if(tag.contains(noise))
+                if(tag.equals(noise))
                 {
                     return false;
                 }
