@@ -27,14 +27,14 @@ import java.util.Set;
 public class BuildTrainTxt {
     public final String HistoryBookDirectory="L:\\program\\cip\\SAT-HISTORY\\resources\\jiaocai4xml";
     public final String HistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\resources\\jiaocai4xml\\jiaocaicontent.txt";
-    public final String TestHistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test-txt.txt";
+    public final String TestHistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test-txt-2.txt";
     public final static String HistoryFILE="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-pos";
     public final static String HistoryFILENEG="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-neg";
     public final static String TestHistoryPos="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-pos";
     public final static String TestHistoryNeg="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-neg";
 
     public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具"};//我们定义的虚假的噪声标签
-    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物"};
+    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物","朝代","世界历史"};
 
 
     /**
@@ -64,7 +64,7 @@ public class BuildTrainTxt {
                 MyFile.Write2File(cc2,path,false);
                 continue;
             }
-            String cc=queryer.GetStringFrom("lemmatitle", tag);
+            String cc=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,postags,false);
             if(!cc.equals(""))
             {
                 String  path=this.TestHistoryPos+"\\"+tag+".txt";

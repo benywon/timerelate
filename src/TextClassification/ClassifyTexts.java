@@ -3,7 +3,6 @@ package TextClassification;
 import Bases.BaseMethods;
 import Bases.MyFile;
 import TimeRelate.FindWordFromSentence;
-import TimeRelate.GetTime;
 import de.bwaldvogel.liblinear.*;
 import libsvm.*;
 
@@ -22,17 +21,36 @@ public class ClassifyTexts {
     public final String NEGFILE=BuildTrainTxt.HistoryFILENEG;
     public final String SVMMODELPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\classiftextsvmmodel.svmmodel";
     public final String SVMMODELPATH2="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\classiftextsvmmodel-liblinear.svmmodel";
-    public int SVMTYPE=2;//默认是libsvm
+    public static int SVMTYPE=2;//默认是libsvm
     public final String TRAINPOSLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\postive.listmap";
     public final String TRAINNEGLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\negative.listmap";
     public final String TESTPOSLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\postive.listmap";
     public final String TESTNEGLISTPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\negative.listmap";
+    public static  svm_model svmmodel; //该方法将svm_model保存到文件中
+    public static  Model libmodel; //该方法将svm_model保存到文件中
     public List<Map<Integer,Integer>> poslist=new ArrayList<>();
     public List<Map<Integer,Integer>> neglist=new ArrayList<>();
     public List<Map<Integer,Integer>> testlist=new ArrayList<>();
-    public ClassifyTexts()
+    public ClassifyTexts(int type)
     {
-
+        SVMTYPE=type;
+        if(type==1)
+        {
+            try {
+                svmmodel=svm.svm_load_model(SVMMODELPATH); //该方法将svm_model保存到文件中
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else if(type==2)
+        {
+            File file=new File(SVMMODELPATH2);
+            try {
+                libmodel=Model.load(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
     //我们的样本集构建完毕之后  就可以来进行建模了
     public void BuildModel(int type)//type是我们的类型 是liblinear还是libsvm
@@ -139,11 +157,11 @@ public class ClassifyTexts {
             //开始建模了
             Problem problem = new Problem();
             problem.l =poslist.size()+neglist.size() ; // number of training examples：训练样本数
-            problem.n=FindWordFromSentence.DictionaryWordCount;
+            problem.n=FindWordFromSentence.ItemSet.size();
             problem.x = featureMatrix; // feature nodes：特征数据
             problem.y = label; // target values：类别
             SolverType solver = SolverType.L2R_L2LOSS_SVC; // -s 0
-            double C = 1.0;    // cost of constraints violation
+            double C = 1.5;    // cost of constraints violation
             double eps = 0.01; // stopping criteria
 
             Parameter parameter = new Parameter(solver, C, eps);
@@ -246,7 +264,6 @@ public List<Double> testresult(String dir,String outpath)
      */
     public void BuildMyFeature(String posdir,String negdir,String OutPosList,String OutNegList)
     {
-        GetTime getTime=new GetTime();
         //首先得到这个正负样本里面的数据
         List<String> posfiles= new ArrayList<>();
         List<String> negfiles= new ArrayList<>();
@@ -279,7 +296,7 @@ public List<Double> testresult(String dir,String outpath)
     //我们先构建正样本的的例子
     public List<Map<Integer, Integer>> BuildMyFeature(String dir)
     {
-        GetTime getTime=new GetTime();
+
         //首先得到这个正负样本里面的数据
         List<String> files= new ArrayList<>();
         MyFile.getFilesFromDirectory(files,dir);
@@ -311,10 +328,63 @@ public List<Double> testresult(String dir,String outpath)
         //预测测试数据的lable
 //        System.out.println(svm.svm_predict(model, pc));
     }
+
+    /**
+     * 对外调用的接口 看是不是历史事件
+     * @param content 输入的文本内容
+     * @return
+     */
+    public static boolean IsHistory(String content)
+    {
+        Map<Integer,Integer> map= FindWordFromSentence.ForwardMaxMatchList(content);
+        map=(Map)BaseMethods.sortMapByKey(map);
+        boolean ishistory=false;
+        if(SVMTYPE==1)
+        {
+            svm_node[] nodes = new svm_node[map.size()];
+            int i=-1;
+            for(Map.Entry<Integer,Integer> entry:map.entrySet())
+            {
+                svm_node node=new svm_node();
+                node.index=entry.getKey();
+                node.value=entry.getValue();
+                nodes[++i]=node;
+            }
+            double result=svm.svm_predict(svmmodel, nodes);
+            if(result>0)
+            {
+                ishistory=true;
+            }
+            else
+            {
+                ishistory=false;
+            }
+
+        }
+        else if(SVMTYPE==2)
+        {
+            Feature[] nodes = new FeatureNode[map.size()];
+            int i = -1;
+            for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
+                FeatureNode node =new FeatureNode(entry.getKey(),entry.getValue());
+                nodes[++i]=node;
+            }
+            double result = Linear.predict(libmodel, nodes);
+            if(result>0)
+            {
+                ishistory=true;
+            }
+            else
+            {
+                ishistory=false;
+            }
+        }
+        return ishistory;
+    }
     public static void main(String[] args) {
-        ClassifyTexts classifyTexts=new ClassifyTexts();
+        ClassifyTexts classifyTexts=new ClassifyTexts(2);
 //        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
-        classifyTexts.BuildModel(2);
+//        classifyTexts.BuildModel(2);
         classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp","L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
 
     }
