@@ -11,7 +11,6 @@ import java.util.*;
  */
 public class GetTime {
     public List<TimeInterval> Dlist = new ArrayList<>();//朝代和时间
-    public static List<String> ItemList = new ArrayList<>();//百科的条目
     public static Set<String> ItemSet = new HashSet<>();//百科的条目
     public static Map<String,Integer> ItemMaps = new HashMap<>();//百科的条目
     public GetItemTime getItemTime = new GetItemTime();
@@ -47,7 +46,6 @@ public class GetTime {
         //首先获取我们的日期文件--朝代 时间
         Dlist = new DealDynasty().dynastylist;
         //然后获取百度百科条目字典文件
-        ItemList = ItemMap.readfrommap(3);
         ItemSet = ItemMap.readfrommap();
         int number=0;
         for(String item:ItemSet)

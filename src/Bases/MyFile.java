@@ -213,6 +213,31 @@ public class MyFile {
         return content;
     }
 
+    /**
+     * 判断文件是否存在
+     * @param filepath
+     * @return
+     */
+    public static boolean IsExit(String filepath)
+    {
+        File f = new File(filepath);
+        if(f.exists())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    public static void DeleteFile(String filepath)
+    {
+        if(IsExit(filepath))
+        {
+            File f = new File(filepath);
+            f.delete();
+        }
+    }
     public static void main(String[] args) {
         String text=getStingLine("J:\\BAIDU\\百度百科\\knowledgeBaseToolFinal\\baiduFinal0723.txt",5000,"utf-8");
         System.out.println(text);

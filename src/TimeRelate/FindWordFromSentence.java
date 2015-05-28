@@ -7,7 +7,6 @@ import java.util.*;
  */
 public class FindWordFromSentence {
     public static Set<String> ItemSet = GetTime.ItemSet;
-    public static List<String> ItemList = GetTime.ItemList;
     public static Map<String,Integer> ItemMap = GetTime.ItemMaps;
 
     private static final int MAX_MATCH_LEGTH=30;
@@ -32,7 +31,7 @@ public class FindWordFromSentence {
             for(j=i+1;j<=len;j++)
             {
                 String temp=sentence.substring(i,j);
-                if(ItemList.contains(temp))
+                if(ItemSet.contains(temp))
                 {
                     num=j-i;
                     wordadd=temp;
