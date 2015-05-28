@@ -76,12 +76,11 @@ public class ClassifyTexts {
 
         //定义svm_parameter对象
         svm_parameter param = new svm_parameter();
-        param.svm_type = svm_parameter.EPSILON_SVR;
-        param.kernel_type = svm_parameter.RBF;
-        param.p = 0.001; //此值为EPSILON_SVR中EPSILON
+        param.svm_type = svm_parameter.C_SVC;
+        param.kernel_type = svm_parameter.LINEAR;
         param.cache_size = 100;
+        param.C = 5;
         param.eps = 0.00001;
-        param.C = 10;
 
         //训练SVM分类模型
         System.out.println(svm.svm_check_parameter(problem, param)); //如果参数没有问题，则svm.svm_check_parameter()函数返回null,否则返回error描述。
@@ -117,17 +116,18 @@ public List<Double> testresult(String dir,String outpath)
     } catch (IOException e) {
         e.printStackTrace();
     }
+    int right=0;
     for(double re:result)
     {
-        MyFile.Write2File(re+"      ",outpath,true);
+        MyFile.Write2File(re + "      ", outpath, true);
+        if(re>0)
+        {
+            right++;
+        }
     }
+    System.out.println("正例为："+right);
     return result;
 }
-
-
-
-
-
 
     //我们先构建正样本的的例子
     public void BuildMyFeature(String posdir,String negdir,String OutPosList,String OutNegList)
@@ -200,9 +200,9 @@ public List<Double> testresult(String dir,String outpath)
 
     public static void main(String[] args) {
         ClassifyTexts classifyTexts=new ClassifyTexts();
-//        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
+        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
         classifyTexts.BuildModel();
-//        classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp","L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
+        classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp","L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
 
     }
 

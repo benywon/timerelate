@@ -33,42 +33,9 @@ public class BuildTrainTxt {
     public final static String TestHistoryPos="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\Test-history-pos";
     public final static String TestHistoryNeg="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\Test-history-neg";
 
-    public static String[] noisetags={"电影","电视剧","歌曲","解释","影视","流行","词语","词汇","汉字","字","旅游","爱情","明星"};//我们定义的虚假的噪声标签
+    public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具"};//我们定义的虚假的噪声标签
+    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物"};
 
-
-    public void getset()
-    {
-        String content=MyFile.readfile(HistoryBookFilePath);
-        //开始查找我们的实体
-        //首先是获取所有的实体的列表
-        String[] contents=content.split("。");
-        Set<String> entityset=new HashSet<>();
-        GetTime getTime=new GetTime();
-        for(String txt:contents)
-        {
-            Set<String> set = FindWordFromSentence.ForwardMaxMatch(txt);//正向最大匹配
-            entityset.addAll(set);
-        }
-        //开始在百度里面检索这个条目是不是
-        Queryer queryer=new Queryer();
-        for(String tag:entityset)
-        {
-            String cc=queryer.GetStringFrom("lemmatitle", tag);
-            if(!cc.equals(""))
-            {
-                String  path=this.HistoryFILE.replaceAll("王思聪",tag);
-                MyFile.Write2File(cc,path,false);
-            }
-            String cc2=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,noisetags );
-            if(!cc2.equals(""))
-            {
-                String  path=this.HistoryFILENEG.replaceAll("王思聪",tag);
-                MyFile.Write2File(cc2,path,false);
-            }
-        }
-        System.out.println("训练集生成成功");
-
-    }
 
     /**
      *
@@ -90,18 +57,20 @@ public class BuildTrainTxt {
         Queryer queryer=new Queryer();
         for(String tag:entityset)
         {
-            String cc=queryer.GetStringFrom("lemmatitle", tag);
-            if(!cc.equals(""))
-            {
-                String  path=this.TestHistoryPos.replaceAll("王思聪",tag);
-                MyFile.Write2File(cc,path,false);
-            }
-            String cc2=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,noisetags );
+            String cc2=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,noisetags,true);
             if(!cc2.equals(""))
             {
-                String  path=this.TestHistoryNeg.replaceAll("王思聪",tag);
+                String  path=this.HistoryFILENEG+"\\"+tag+".txt";
                 MyFile.Write2File(cc2,path,false);
+                continue;
             }
+//            String cc=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,postags,false);
+//            if(!cc.equals(""))
+//            {
+//                String  path=this.HistoryFILE+"\\"+tag+".txt";
+//                MyFile.Write2File(cc,path,false);
+//            }
+
         }
         System.out.println("测试集生成成功");
 

@@ -5,8 +5,8 @@ package TextClassification;
  */
 public class test {
     public static void main(String[] args) {
-        String path="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-pos\\王思聪.txt";
-        String cc=path.replaceAll("\\\\王思聪.txt","");
-        System.out.println(cc);
+        String HistoryFILENEG="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-neg";
+        String  path=HistoryFILENEG+"\\\\"+"李开复"+".txt";
+        System.out.println(path);
     }
 }

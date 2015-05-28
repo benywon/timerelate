@@ -107,7 +107,7 @@ public class Queryer {
      }
     return str;
  }
-    public  String GetStringFromBaiduWithTagConstrain(String field,String inquery,String[] tag)
+    public  String GetStringFromBaiduWithTagConstrain(String field,String inquery,String[] tag,Boolean isnoise)
     {
         IndexSearcher searcher = new IndexSearcher(ir);
         Term t =new Term(field,inquery);
@@ -118,7 +118,7 @@ public class Queryer {
             for (ScoreDoc hit : docs) {
                 //我们还要有一个判断是不是
                 Document doc = searcher.doc(hit.doc);
-                if(isvalidhistory(doc,tag)) {
+                if(isvalidhistory(doc,tag,isnoise)) {
                     str += doc.getField("content").stringValue();
                 }
             }
@@ -174,7 +174,7 @@ public class Queryer {
      * @param doc
      * @return
      */
-    public static boolean isvalidhistory(Document doc,String[] intags) {
+    public static boolean isvalidhistory(Document doc,String[] intags,Boolean isnoise) {
         String idstr = doc.getField("sublemmaid").stringValue();
         int id = Integer.parseInt(idstr);
         String result;
@@ -187,10 +187,21 @@ public class Queryer {
         }
         Set<String> tags = new HashSet<String>(Arrays.asList(result.split(",")));
         //先排除噪声的影响
+        //先排除噪声的影响
+        if(!isnoise)
+        {
+            for (String tag : tags) {
+                for (String noise : noisetags) {
+                    if (tag.equals(noise)) {
+                        return false;
+                    }
+                }
+            }
+        }
         for (String thistag : tags) {
             for(String tag:intags)
             {
-                if (thistag.contains(tag))
+                if (thistag.equals(tag))
                 {
                     return true;
                 }
@@ -198,4 +209,5 @@ public class Queryer {
         }
         return false;
     }
+
 }
