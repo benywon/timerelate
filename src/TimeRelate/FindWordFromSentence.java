@@ -8,6 +8,8 @@ import java.util.*;
 public class FindWordFromSentence {
     public static Set<String> ItemSet = GetTime.ItemSet;
     public static List<String> ItemList = GetTime.ItemList;
+    public static Map<String,Integer> ItemMap = GetTime.ItemMaps;
+
     private static final int MAX_MATCH_LEGTH=30;
     /**
      * 依靠正向最大匹配获取百科实体
@@ -78,7 +80,8 @@ public class FindWordFromSentence {
             }
             if(wordadd!=null)
             {
-                int index=ItemList.indexOf(wordadd);
+//                int index=ItemList.indexOf(wordadd);
+                int index=ItemMap.get(wordadd);
                 if(map.containsKey(index))
                 {
                     map.put(index,map.get(index)+1);

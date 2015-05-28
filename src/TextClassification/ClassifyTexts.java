@@ -2,7 +2,6 @@ package TextClassification;
 
 import Bases.MyFile;
 import TimeRelate.FindWordFromSentence;
-import TimeRelate.GetTime;
 import libsvm.*;
 
 import java.util.ArrayList;
@@ -16,11 +15,26 @@ import java.util.Map;
 public class ClassifyTexts {
     public final String POSFILE=BuildTrainTxt.HistoryFILE;
     public final String NEGFILE=BuildTrainTxt.HistoryFILENEG;
-    List<String> DICTIONARY=new ArrayList<>();
+    public List<Map<Integer,Integer>> poslist=new ArrayList<>();
+    public List<Map<Integer,Integer>> neglist=new ArrayList<>();
     public ClassifyTexts()
     {
-        GetTime getTime=new GetTime();
+
+        this.poslist= (List<Map<Integer, Integer>>) MyFile.ReadObj("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\postive.listmap");
+        this.neglist= (List<Map<Integer, Integer>>) MyFile.ReadObj("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\negative.listmap");
     }
+    //我们的样本集构建完毕之后  就可以来进行建模了
+    public void BuildModel()
+    {
+
+    }
+
+
+
+
+
+
+
     //我们先构建正样本的的例子
     public void BuildMyFeature()
     {
@@ -30,7 +44,7 @@ public class ClassifyTexts {
         List<String> posfiles= new ArrayList<>();
         List<String> negfiles= new ArrayList<>();
         MyFile.getFilesFromDirectory(posfiles,posdir);
-        MyFile.getFilesFromDirectory(negfiles,posdir);
+        MyFile.getFilesFromDirectory(negfiles,negdir);
         //首先建立正类的分类器
         List<Map<Integer,Integer>> poslist=new ArrayList<>();
         List<Map<Integer,Integer>> neglist=new ArrayList<>();
