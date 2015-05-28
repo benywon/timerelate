@@ -3,6 +3,7 @@ package TimeRelate;
 import BaiduRelate.ItemMap;
 import BaiduRelate.Queryer;
 import Bases.BaseMethods;
+import TextClassification.ClassifyTexts;
 
 import java.util.*;
 
@@ -53,6 +54,8 @@ public class GetTime {
             ItemMaps.put(item,number++);
         }
         query = new Queryer();//百度相关的  检索器什么的 因为都是静态方法 所以只用在初始化的时候初始化一下就行
+        ClassifyTexts classifyTexts=new ClassifyTexts(2);
+        System.out.println("gettime初始化成功");
     }
 
     public List<Integer> gettimefromstring(String str) {

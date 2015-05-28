@@ -38,8 +38,9 @@ public class BuildTrainTxt {
 
 
     /**
-     *
-     */
+     *产生一个跟历史有关的文件s  输入文本是一个自然语言文章 输出的是百科条目中包含有这些关键词并且
+     * 类型是历史的文章 存成文件夹
+      */
     public void getsettest()
     {
         String content=MyFile.readfile(TestHistoryBookFilePath);

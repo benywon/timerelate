@@ -51,8 +51,14 @@ public class ClassifyTexts {
                 e.printStackTrace();
             }
         }
+        System.out.println("历史文本分类器初始化成功");
     }
     //我们的样本集构建完毕之后  就可以来进行建模了
+
+    /**
+     * 根据我们的类型来构建模型
+     * @param type 1是libsvm包 2是liblinear包
+     */
     public void BuildModel(int type)//type是我们的类型 是liblinear还是libsvm
     {
         String trainfile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\train.txt";
@@ -294,6 +300,12 @@ public List<Double> testresult(String dir,String outpath)
         MyFile.WriteMap(neglist,OutNegList);
     }
     //我们先构建正样本的的例子
+
+    /**
+     * 通过一个文件夹下面的文件来对输入的一串字符串产生一个特征向量的列表
+     * @param dir 文件夹目录  里面有很多子文件
+     * @return 最后的特征矩阵
+     */
     public List<Map<Integer, Integer>> BuildMyFeature(String dir)
     {
 
@@ -313,22 +325,6 @@ public List<Double> testresult(String dir,String outpath)
         }
         return list;
     }
-    public void caldev()
-    {
-
-        //定义测试数据点c
-        svm_node pc0 = new svm_node();
-        pc0.index = 0;
-        pc0.value = 4;
-        svm_node pc1 = new svm_node();
-        pc1.index = 22322;
-        pc1.value = 12;
-        svm_node[] pc = {pc0, pc1};
-
-        //预测测试数据的lable
-//        System.out.println(svm.svm_predict(model, pc));
-    }
-
     /**
      * 对外调用的接口 看是不是历史事件
      * @param content 输入的文本内容

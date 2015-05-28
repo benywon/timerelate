@@ -4,6 +4,7 @@ package BaiduRelate;
 //import org.apache.lucene.analysis.core.SimpleAnalyzer;
 
 import BaiduRelate.oldbaidu.MYDB;
+import TextClassification.ClassifyTexts;
 import TimeRelate.DealDynasty;
 import TimeRelate.TimeInterval;
 import com.chenlb.mmseg4j.analysis.SimpleAnalyzer;
@@ -97,9 +98,14 @@ public class Queryer {
          for (ScoreDoc hit : docs) {
              //我们还要有一个判断是不是
              Document doc = searcher.doc(hit.doc);
-             if(isvalidhistory(doc)) {
+             String txt=doc.getField("content").stringValue();
+             if(ClassifyTexts.IsHistory(txt))
+             {
                  str += doc.getField("content").stringValue();
              }
+//             if(isvalidhistory(doc)) {
+//                 str += doc.getField("content").stringValue();
+//             }
          }
 
      } catch (IOException e) {
