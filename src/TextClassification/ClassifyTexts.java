@@ -3,6 +3,7 @@ package TextClassification;
 import Bases.BaseMethods;
 import Bases.MyFile;
 import TimeRelate.FindWordFromSentence;
+import TimeRelate.GetTime;
 import de.bwaldvogel.liblinear.*;
 import libsvm.*;
 
@@ -31,26 +32,32 @@ public class ClassifyTexts {
     public List<Map<Integer,Integer>> poslist=new ArrayList<>();
     public List<Map<Integer,Integer>> neglist=new ArrayList<>();
     public List<Map<Integer,Integer>> testlist=new ArrayList<>();
+    public static double CC=1.5;
+    public static double est=0.01;
+
     public ClassifyTexts(int type)
     {
+        GetTime getTime=new GetTime();
         SVMTYPE=type;
-        if(type==1)
-        {
-            try {
-                svmmodel=svm.svm_load_model(SVMMODELPATH); //该方法将svm_model保存到文件中
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        else if(type==2)
-        {
-            File file=new File(SVMMODELPATH2);
-            try {
-                libmodel=Model.load(file);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+//        if(type==1)
+//        {
+//            try {
+//                svmmodel=svm.svm_load_model(SVMMODELPATH); //该方法将svm_model保存到文件中
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        else if(type==2)
+//        {
+//            File file=new File(SVMMODELPATH2);
+//            try {
+//                libmodel=Model.load(file);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+        this.poslist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINPOSLISTPATH);
+        this.neglist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINNEGLISTPATH);
         System.out.println("历史文本分类器初始化成功");
     }
     //我们的样本集构建完毕之后  就可以来进行建模了
@@ -62,8 +69,7 @@ public class ClassifyTexts {
     public void BuildModel(int type)//type是我们的类型 是liblinear还是libsvm
     {
         String trainfile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\train.txt";
-        this.poslist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINPOSLISTPATH);
-        this.neglist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINNEGLISTPATH);
+
         System.out.println("读取训练集完毕");
         if(type==1) {
             SVMTYPE=1;
@@ -167,8 +173,8 @@ public class ClassifyTexts {
             problem.x = featureMatrix; // feature nodes：特征数据
             problem.y = label; // target values：类别
             SolverType solver = SolverType.L2R_L2LOSS_SVC; // -s 0
-            double C = 1.5;    // cost of constraints violation
-            double eps = 0.01; // stopping criteria
+            double C = CC;    // cost of constraints violation
+            double eps = est; // stopping criteria
 
             Parameter parameter = new Parameter(solver, C, eps);
             Model model = Linear.train(problem, parameter);
@@ -254,6 +260,7 @@ public List<Double> testresult(String dir,String outpath)
             }
         }
         System.out.println("正例为："+right);
+        MyFile.Write2File("CC:"+CC+"est"+est+"---\t---"+right+"\n","L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\result.txt",true);
 
     }
     return result;
@@ -380,8 +387,13 @@ public List<Double> testresult(String dir,String outpath)
     public static void main(String[] args) {
         ClassifyTexts classifyTexts=new ClassifyTexts(2);
 //        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
-//        classifyTexts.BuildModel(2);
-        classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp","L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
+        for(est=1;est>0.005;est/=2)
+        for(CC=0.1;CC<500;CC*=5)
+            {
+                System.out.println(CC+"---"+est);
+                classifyTexts.BuildModel(2);
+                classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp", "L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
+            }
 
     }
 
