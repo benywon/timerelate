@@ -9,9 +9,7 @@ import libsvm.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**我们构建的特征直接就是这个文档的bag-of words信息
  * 首先还是用字典分词
@@ -32,8 +30,8 @@ public class ClassifyTexts {
     public List<Map<Integer,Integer>> poslist=new ArrayList<>();
     public List<Map<Integer,Integer>> neglist=new ArrayList<>();
     public List<Map<Integer,Integer>> testlist=new ArrayList<>();
-    public static double CC=1.5;
-    public static double est=0.01;
+    public static double CC=5;
+    public static double est=0.15;
 
     public ClassifyTexts(int type)
     {
@@ -245,6 +243,8 @@ public List<Double> testresult(String dir,String outpath)
                     nodes[++i]=node;
                 }
                 double prediction = Linear.predict(model, nodes);
+                double[] cc = new double[2];
+                Linear.predictProbability(model,nodes,cc);
                 result.add(prediction);
             }
         } catch (IOException e) {
@@ -283,16 +283,25 @@ public List<Double> testresult(String dir,String outpath)
         MyFile.getFilesFromDirectory(posfiles,posdir);
         MyFile.getFilesFromDirectory(negfiles,negdir);
         //首先建立正类的分类器
-        List<Map<Integer,Integer>> poslist=new ArrayList<>();
+        Map<Map<Integer,Integer>,List<Integer>> poslist=new HashMap<>();
+        Map<String,Set<String>> indexmap=MyFile.ReadMap(BuildTrainTxt.TagIndexFile);
         List<Map<Integer,Integer>> neglist=new ArrayList<>();
+        List<String> tagsindexf= (List<String>) MyFile.ReadObj(BuildTrainTxt.TagIndexFileMost100);
         for(String file:posfiles)
         {
             String content=MyFile.readfile(file);
             System.out.println(file);
             //对这一个文章的特征进行提取
             //首先得到这个文章所有的词项
+            Set<String> list=indexmap.get(file);
+            List<Integer> tagindex=new ArrayList<>();
+            for(String str:list)
+            {
+                int cc=tagsindexf.indexOf(str);
+                tagindex.add(cc);
+            }
             Map<Integer,Integer> map= FindWordFromSentence.ForwardMaxMatchList(content);
-            poslist.add(map);
+            poslist.put(map,tagindex);
         }
         for(String file:negfiles)
         {
@@ -386,14 +395,12 @@ public List<Double> testresult(String dir,String outpath)
     }
     public static void main(String[] args) {
         ClassifyTexts classifyTexts=new ClassifyTexts(2);
-//        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
-        for(est=1;est>0.005;est/=2)
-        for(CC=0.1;CC<500;CC*=5)
-            {
-                System.out.println(CC+"---"+est);
+        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
+
+
                 classifyTexts.BuildModel(2);
                 classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp", "L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
-            }
+
 
     }
 

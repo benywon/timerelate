@@ -1,6 +1,7 @@
 package TextClassification;
 
 import BaiduRelate.Queryer;
+import Bases.BaseMethods;
 import Bases.MyFile;
 import TimeRelate.FindWordFromSentence;
 import TimeRelate.GetTime;
@@ -14,10 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * 从我们的所有百度文档里面的得到训练集的一个程序
@@ -27,11 +25,14 @@ import java.util.Set;
 public class BuildTrainTxt {
     public final String HistoryBookDirectory="L:\\program\\cip\\SAT-HISTORY\\resources\\jiaocai4xml";
     public final String HistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\resources\\jiaocai4xml\\jiaocaicontent.txt";
-    public final String TestHistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test-txt-2.txt";
+    public final String TestHistoryBookFilePath ="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test-txt.txt";
     public final static String HistoryFILE="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-pos";
     public final static String HistoryFILENEG="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-neg";
     public final static String TestHistoryPos="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-pos";
     public final static String TestHistoryNeg="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-neg";
+    public final static String TagCountFile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\TagCountFile.map";
+    public final static String TagIndexFile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag.map";
+    public final static String TagIndexFileMost100="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag100.list";
 
     public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具"};//我们定义的虚假的噪声标签
     public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物","朝代","世界历史"};
@@ -44,8 +45,10 @@ public class BuildTrainTxt {
     public void getsettest()
     {
         String content=MyFile.readfile(TestHistoryBookFilePath);
+        Map<String,Set<String>> indextag=new HashMap<>();
         //开始查找我们的实体
         //首先是获取所有的实体的列表
+        Map<String,Integer> tagcount=new HashMap<>();
         String[] contents=content.split("。");
         Set<String> entityset=new HashSet<>();
         GetTime getTime=new GetTime();
@@ -58,21 +61,39 @@ public class BuildTrainTxt {
         Queryer queryer=new Queryer();
         for(String tag:entityset)
         {
+            System.out.println(tag);
             String cc2=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,noisetags,true);
             if(!cc2.equals(""))
             {
-                String  path=this.TestHistoryNeg+"\\"+tag+".txt";
+                String  path=this.HistoryFILENEG+"\\"+tag+".txt";
                 MyFile.Write2File(cc2,path,false);
                 continue;
             }
+
             String cc=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,postags,false);
             if(!cc.equals(""))
             {
-                String  path=this.TestHistoryPos+"\\"+tag+".txt";
+                Set<String> tags=Queryer.TagsCount;
+                for(String thistag:tags)
+                {
+                    if(tagcount.containsKey(thistag))
+                    {
+                        int count=tagcount.get(thistag);
+                        tagcount.put(thistag,++count);
+                    }
+                    else
+                    {
+                        tagcount.put(thistag,1);
+                    }
+                }
+                String  path=this.HistoryFILE+"\\"+tag+".txt";
+                indextag.put(path,tags);
                 MyFile.Write2File(cc,path,false);
             }
 
         }
+        MyFile.WriteMap(tagcount,TagCountFile);
+        MyFile.WriteMap(indextag,"./indextag.map");
         System.out.println("测试集生成成功");
 
     }
@@ -125,9 +146,32 @@ public class BuildTrainTxt {
        }
         return value;
        }
+    public static void gettagscount()
+    {
+        Map<String,Integer> map= (Map<String, Integer>) MyFile.ReadObj(TagCountFile);
+        map= BaseMethods.sortByValue(map, false);
+        String content="";
+        List<String> list=new ArrayList<>();
+        int num=0;
+        for(Map.Entry<String, Integer> entry:map.entrySet()){
+            String co=entry.getKey();
+           int cou=entry.getValue();
+            content+=co+"\t"+cou+"\n";
+            if(++num<=100)
+            {
+                list.add(co);
+            }
+
+        }
+        MyFile.WriteMap(list,TagIndexFileMost100);
+        MyFile.Write2File(content,"L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\tagscount.txt",false);
+        System.out.println("成功");
+    }
     public static void main(String[] args) {
-        BuildTrainTxt buildTrainTxt=new BuildTrainTxt();
-        buildTrainTxt.getsettest();
+//        BuildTrainTxt buildTrainTxt=new BuildTrainTxt();
+//        buildTrainTxt.getsettest();
+        gettagscount();
+
     }
 
 }
