@@ -1,16 +1,22 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="java-start-end:jar">
-    <output-path>$PROJECT_DIR$/out/artifacts/java_start_end_jar</output-path>
+  <artifact type="jar" name="java:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/java_jar</output-path>
     <root id="archive" name="java.jar">
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/out/META-INF/MANIFEST.MF" />
+      </element>
       <element id="module-output" name="java" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/liblinear-java-1.95.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/dom4j-1.6.1.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/lukeall-4.10.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/lucene-analyzers-common-4.10.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/lucene-core-4.10.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/lucene-queries-4.10.2.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/lucene-queryparser-4.10.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/libsvm.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/mmseg4j-analysis-1.9.1.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$PROJECT_DIR$/libs/mmseg4j-core-1.9.1.jar" path-in-jar="/" />
-      <element id="extracted-dir" path="$PROJECT_DIR$/libs/lukeall-4.10.2.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/libs/postgresql-9.4-1201.jdbc41.jar" path-in-jar="/" />
     </root>
   </artifact>
 </component>

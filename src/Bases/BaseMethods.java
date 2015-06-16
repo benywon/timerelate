@@ -73,6 +73,39 @@ public class BaseMethods {
         }
         return result;
     }
+
+    /**
+     * 按照第二个值来表明是升序还是降序
+     * @param map
+     * @param accent
+     * @return
+     */
+    public static Map sortByValue(Map map,boolean accent)
+    {
+        List list = new LinkedList(map.entrySet());
+        Collections.sort(list, new Comparator() {
+
+            public int compare(Object o1, Object o2) {
+                if(accent) {
+                    return ((Comparable) ((Map.Entry) (o1)).getValue())
+                            .compareTo(((Map.Entry) (o2)).getValue());
+                }
+                else
+                {
+                    return ((Comparable) ((Map.Entry) (o2)).getValue())
+                            .compareTo(((Map.Entry) (o1)).getValue());
+                }
+
+            }
+        });
+        Map result = new LinkedHashMap();
+
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            result.put(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
     /**
      * 使用 Map按key进行排序
      * @param oriMap

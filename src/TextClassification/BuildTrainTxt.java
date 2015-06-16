@@ -35,8 +35,7 @@ public class BuildTrainTxt {
     public final static String TagIndexFileMost100="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag100.list";
 
     public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具"};//我们定义的虚假的噪声标签
-    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物","朝代","世界历史"};
-
+    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物","朝代","世界历史","政治","宗教","年号","地名"};
 
     /**
      *产生一个跟历史有关的文件s  输入文本是一个自然语言文章 输出的是百科条目中包含有这些关键词并且
@@ -93,7 +92,7 @@ public class BuildTrainTxt {
 
         }
         MyFile.WriteMap(tagcount,TagCountFile);
-        MyFile.WriteMap(indextag,"./indextag.map");
+        MyFile.WriteMap(indextag,TagIndexFile);
         System.out.println("测试集生成成功");
 
     }
@@ -168,8 +167,8 @@ public class BuildTrainTxt {
         System.out.println("成功");
     }
     public static void main(String[] args) {
-//        BuildTrainTxt buildTrainTxt=new BuildTrainTxt();
-//        buildTrainTxt.getsettest();
+        BuildTrainTxt buildTrainTxt=new BuildTrainTxt();
+        buildTrainTxt.getsettest();
         gettagscount();
 
     }

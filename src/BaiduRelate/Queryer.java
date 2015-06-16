@@ -30,6 +30,7 @@ public class Queryer {
     public static MYDB MyDb=new MYDB();
     private static List<String> HistoryTags=new ArrayList<>();//我们的历史标签还应该包括朝代名称
     public static String[] noisetags={"电影","电视剧","歌曲","解释","影视","流行","词语","词汇","汉字","字"};//我们定义的虚假的噪声标签
+    public static Set<String> TagsCount;
     static IndexReader ir = null;
     public Queryer()
     {
@@ -134,7 +135,6 @@ public class Queryer {
         }
         return str;
     }
-
     public static boolean isvalidhistory(Document doc)
     {
         String idstr=doc.getField("sublemmaid").stringValue();
@@ -209,11 +209,11 @@ public class Queryer {
             {
                 if (thistag.equals(tag))
                 {
+                    TagsCount=tags;
                     return true;
                 }
             }
         }
         return false;
     }
-
 }
