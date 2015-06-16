@@ -8,7 +8,8 @@ import java.util.*;
 public class FindWordFromSentence {
     public static Set<String> ItemSet = GetTime.ItemSet;
     public static Map<String,Integer> ItemMap = GetTime.ItemMaps;
-
+//    public static Set<String> ItemSet = TagRelate.ItemSet;
+//    public static Map<String,Integer> ItemMap = TagRelate.ItemMaps;
 
     private static final int MAX_MATCH_LEGTH=30;
     /**

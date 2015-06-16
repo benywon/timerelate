@@ -52,7 +52,12 @@ public class ItemMap {
         set= (Set<String>)MyFile.ReadObj(ItemMapFile);
         return set;
     }
-
+    public static Set readfrommap(String path)
+    {
+        Set<String> set=new HashSet<>();
+        set= (Set<String>)MyFile.ReadObj(path);
+        return set;
+    }
     public static List readfrommap(int number)
     {
         List<String> set=new ArrayList<>();

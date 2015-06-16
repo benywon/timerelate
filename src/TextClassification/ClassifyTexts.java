@@ -17,8 +17,8 @@ import java.util.*;
  * Created by benywon on 2015/5/27.
  */
 public class ClassifyTexts {
-    public final String POSFILE=BuildTrainTxt.HistoryFILE;
-    public final String NEGFILE=BuildTrainTxt.HistoryFILENEG;
+    public final String POSFILE=BuildTrainTxt.TestHistoryPos;
+    public final String NEGFILE=BuildTrainTxt.TestHistoryNeg;
 //    public final String SVMMODELPATH="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\classiftextsvmmodel-liblinear.svmmodel";
 
     public final String SVMMODELPATH2="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\classiftextsvmmodel-liblinear.logisticmodel";
@@ -29,7 +29,7 @@ public class ClassifyTexts {
 //
     public static  svm_model svmmodel; //该方法将svm_model保存到文件中
     public static  Model libmodel; //该方法将svm_model保存到文件中
-    public static int POSPOINTNUM=9281;
+    public static int POSPOINTNUM=0;
 //    public static int POSPOINTNUM=4763;
     public Map<Map<Integer,Integer>,List<Integer>> poslist=new HashMap<>();
     public List<Map<Integer,Integer>> neglist=new ArrayList<>();
@@ -70,21 +70,21 @@ public class ClassifyTexts {
 //                e.printStackTrace();
 //            }
 //        }
-//        this.poslist= (Map<Map<Integer, Integer>, List<Integer>>) MyFile.ReadObj(TRAINPOSLISTPATH);
-//        this.neglist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINNEGLISTPATH);
+        this.poslist= (Map<Map<Integer, Integer>, List<Integer>>) MyFile.ReadObj(TRAINPOSLISTPATH);
+        this.neglist= (List<Map<Integer, Integer>>) MyFile.ReadObj(TRAINNEGLISTPATH);
         int num =0;
-//        for (Map.Entry<Map<Integer,Integer>,List<Integer>> entry:poslist.entrySet())
-//        {
-//            List<Integer> list=entry.getValue();
-//            num+=list.size();
-//        }
-//        POSPOINTNUM=num;
+        for (Map.Entry<Map<Integer,Integer>,List<Integer>> entry:poslist.entrySet())
+        {
+            List<Integer> list=entry.getValue();
+            num+=list.size();
+        }
+        POSPOINTNUM=num;
         String txt=MyFile.readfile("1.txt");
         num=Integer.parseInt(txt);
         SVMMODELPATH+=num+"";
-        RESULTNEG=RESULTNEG.replaceAll("&&",num+"");
-        RESULTPOS=RESULTPOS.replaceAll("&&",num+"");
-        RESULTTXT=RESULTTXT.replaceAll("&&",num+"");
+//        RESULTNEG=RESULTNEG.replaceAll("&&",num+"");
+//        RESULTPOS=RESULTPOS.replaceAll("&&",num+"");
+//        RESULTTXT=RESULTTXT.replaceAll("&&",num+"");
         num++;
         MyFile.Write2File(num+"","1.txt",false);
 
@@ -202,7 +202,7 @@ public class ClassifyTexts {
                     }
 
                 featureMatrix[++j]=nodes;
-                label[j]=100;
+                label[j]=50;
             }
             //开始建模了
             Problem problem = new Problem();
@@ -210,7 +210,7 @@ public class ClassifyTexts {
             problem.n=FindWordFromSentence.ItemSet.size()==0?4988815:FindWordFromSentence.ItemSet.size();
             problem.x = featureMatrix; // feature nodes：特征数据
             problem.y = label; // target values：类别
-            SolverType solver = SolverType.L2R_LR_DUAL; // -s 0
+            SolverType solver = SolverType.L2R_LR; // -s 0
             double C = 1.0;    // cost of constraints violation
             double eps = 0.01; // stopping criteria
             Parameter parameter = new Parameter(solver, C, eps);
@@ -486,8 +486,8 @@ public List<Double> testresult(String dir,String outpath)
         System.out.println("开始");
         ClassifyTexts classifyTexts=new ClassifyTexts(2);
 //        classifyTexts.BuildMyFeature(classifyTexts.POSFILE,classifyTexts.NEGFILE,classifyTexts.TRAINPOSLISTPATH,classifyTexts.TRAINNEGLISTPATH);
-//        classifyTexts.BuildModel(2);
-        classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp\\pos", "L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
+        classifyTexts.BuildModel(2);
+//        classifyTexts.testresult("L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\temp\\pos", "L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\posresult.txt");
 
 
     }

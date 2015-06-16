@@ -30,12 +30,12 @@ public class BuildTrainTxt {
     public final static String HistoryFILENEG="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\history-neg";
     public final static String TestHistoryPos="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-pos";
     public final static String TestHistoryNeg="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\test\\Test-history-neg";
-    public final static String TagCountFile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\TagCountFile.map";
-    public final static String TagIndexFile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag.map";
-    public final static String TagIndexFileMost100="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag100.list";
+    public final static String TagCountFile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\TagCountFile.map1";
+    public final static String TagIndexFile="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag.map1";
+    public final static String TagIndexFileMost100="L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\indextag100.list2";
 
-    public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具"};//我们定义的虚假的噪声标签
-    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物","朝代","世界历史","政治","宗教","年号","地名"};
+    public static String[] noisetags={"电影","电视剧","歌曲","影视","演员","交通","词语","流行","生活","词汇","旅游","爱情","明星","工具","水果"};//我们定义的虚假的噪声标签
+    public static String[] postags={"历史","中国历史","历史人物","战争","革命","文物","朝代","世界历史","政治","宗教","年号","地名","佛教","制度","文物","中国"};
 
     /**
      *产生一个跟历史有关的文件s  输入文本是一个自然语言文章 输出的是百科条目中包含有这些关键词并且
@@ -64,7 +64,7 @@ public class BuildTrainTxt {
             String cc2=queryer.GetStringFromBaiduWithTagConstrain("lemmatitle", tag,noisetags,true);
             if(!cc2.equals(""))
             {
-                String  path=this.HistoryFILENEG+"\\"+tag+".txt";
+                String  path=this.TestHistoryNeg+"\\"+tag+".txt";
                 MyFile.Write2File(cc2,path,false);
                 continue;
             }
@@ -85,7 +85,7 @@ public class BuildTrainTxt {
                         tagcount.put(thistag,1);
                     }
                 }
-                String  path=this.HistoryFILE+"\\"+tag+".txt";
+                String  path=this.TestHistoryPos+"\\"+tag+".txt";
                 indextag.put(path,tags);
                 MyFile.Write2File(cc,path,false);
             }
@@ -156,19 +156,23 @@ public class BuildTrainTxt {
             String co=entry.getKey();
            int cou=entry.getValue();
             content+=co+"\t"+cou+"\n";
-            if(++num<=100)
+            if(++num<=50)
             {
                 list.add(co);
+            }
+            else
+            {
+                break;
             }
 
         }
         MyFile.WriteMap(list,TagIndexFileMost100);
-        MyFile.Write2File(content,"L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\tagscount.txt",false);
+        MyFile.Write2File(content,"L:\\program\\cip\\SAT-HISTORY\\5月\\历史标签\\tagrelate\\tagscount1.txt",false);
         System.out.println("成功");
     }
     public static void main(String[] args) {
         BuildTrainTxt buildTrainTxt=new BuildTrainTxt();
-        buildTrainTxt.getsettest();
+//        buildTrainTxt.getsettest();
         gettagscount();
 
     }
